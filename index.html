@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SE Quiz — National Skill Competency Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131d;
+    --surface2: #1c1c2e;
+    --border: #2a2a3d;
+    --accent: #7c6aff;
+    --accent2: #ff6ab0;
+    --accent3: #6affb0;
+    --text: #e8e6ff;
+    --muted: #7c7a99;
+    --correct: #00e599;
+    --wrong: #ff4d6d;
+    --warn: #ffd166;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 20%, rgba(124,106,255,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(255,106,176,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 50% 110%, rgba(106,255,176,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Grain texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 20px 60px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-text {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .header-badge {
+    background: rgba(124,106,255,0.15);
+    border: 1px solid rgba(124,106,255,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; animation: fadeUp 0.5s ease forwards; }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── START SCREEN ── */
+  .start-hero {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .start-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(124,106,255,0.1);
+    border: 1px solid rgba(124,106,255,0.25);
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+
+  .start-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(42px, 8vw, 72px);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .start-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 440px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+
+  .stat-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .stat-chip span:first-child { font-size: 16px; }
+  .stat-chip strong { color: var(--text); font-weight: 700; }
+
+  .btn-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--accent), #9b5de5);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 18px 48px;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(124,106,255,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-start::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-start:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(124,106,255,0.5); }
+  .btn-start:hover::after { opacity: 1; }
+  .btn-start:active { transform: translateY(0); }
+
+  /* ── QUIZ SCREEN ── */
+  .quiz-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .q-counter {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .q-counter strong { color: var(--text); font-size: 18px; }
+
+  .timer {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s;
+  }
+
+  .timer.urgent { border-color: var(--wrong); color: var(--wrong); background: rgba(255,77,109,0.1); animation: pulse 0.6s infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.04); } }
+
+  .score-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .score-display strong { color: var(--accent3); }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    height: 5px;
+    background: var(--surface2);
+    border-radius: 100px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .q-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  }
+
+  .q-num-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .q-num-badge::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .q-text {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(17px, 2.5vw, 22px);
+    line-height: 1.5;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  /* Options */
+  .options-grid {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 22px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    font-family: 'Syne', sans-serif;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.45;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn:not(.answered):hover {
+    border-color: var(--accent);
+    background: rgba(124,106,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-label {
+    min-width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .option-btn:not(.answered):hover .option-label {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(124,106,255,0.15);
+  }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,153,0.08);
+  }
+
+  .option-btn.correct .option-label {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: #000;
+  }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.08);
+  }
+
+  .option-btn.wrong .option-label {
+    background: var(--wrong);
+    border-color: var(--wrong);
+    color: #fff;
+  }
+
+  .option-btn.reveal {
+    border-color: rgba(0,229,153,0.4);
+    background: rgba(0,229,153,0.04);
+    opacity: 0.7;
+  }
+
+  .option-btn.reveal .option-label {
+    border-color: var(--correct);
+    color: var(--correct);
+  }
+
+  .check-icon {
+    margin-left: auto;
+    font-size: 18px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* Feedback & Explanation */
+  .feedback-box {
+    border-radius: var(--radius-sm);
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    display: none;
+    animation: fadeUp 0.3s ease;
+    border: 1.5px solid;
+  }
+
+  .feedback-box.correct { border-color: rgba(0,229,153,0.3); background: rgba(0,229,153,0.07); }
+  .feedback-box.wrong   { border-color: rgba(255,77,109,0.3); background: rgba(255,77,109,0.07); }
+  .feedback-box.timeout { border-color: rgba(255,209,102,0.3); background: rgba(255,209,102,0.07); }
+
+  .feedback-label {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .feedback-box.correct .feedback-label { color: var(--correct); }
+  .feedback-box.wrong   .feedback-label { color: var(--wrong); }
+  .feedback-box.timeout .feedback-label { color: var(--warn); }
+
+  .feedback-explain {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .feedback-explain em { color: var(--text); font-style: normal; }
+
+  /* Action buttons */
+  .action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .btn-skip, .btn-next {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 30px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-skip {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+  }
+  .btn-skip:hover { border-color: var(--muted); color: var(--text); }
+
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent), #9b5de5);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(124,106,255,0.3);
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .btn-next.visible { display: flex; }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,255,0.45); }
+  .btn-next:active { transform: translateY(0); }
+
+  /* ── RESULTS SCREEN ── */
+  .results-header {
+    text-align: center;
+    padding: 32px 0 28px;
+  }
+
+  .trophy {
+    font-size: 64px;
+    display: block;
+    margin-bottom: 16px;
+    animation: bounce 0.8s ease forwards;
+  }
+
+  @keyframes bounce {
+    0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+    60%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .results-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .results-sub { color: var(--muted); font-size: 15px; }
+
+  .score-ring-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 32px 0;
+  }
+
+  .score-ring {
+    width: 180px; height: 180px;
+    position: relative;
+  }
+
+  .score-ring svg { width: 180px; height: 180px; transform: rotate(-90deg); }
+
+  .score-ring-bg { fill: none; stroke: var(--surface2); stroke-width: 12; }
+  .score-ring-fg { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(0.34, 1.3, 0.64, 1); }
+
+  .score-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-big {
+    font-family: 'Fraunces', serif;
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .score-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 500px) { .stats-cards { grid-template-columns: 1fr 1fr; } }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-card-num {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-card.c .stat-card-num  { color: var(--correct); }
+  .stat-card.w .stat-card-num  { color: var(--wrong); }
+  .stat-card.sk .stat-card-num { color: var(--warn); }
+  .stat-card.t .stat-card-num  { color: var(--accent); }
+  .stat-card.p .stat-card-num  { color: var(--accent2); }
+  .stat-card.acc .stat-card-num{ color: var(--accent3); }
+
+  .stat-card-lbl { font-size: 12px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+
+  .grade-badge {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .grade-pill {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 10px 28px;
+    border-radius: 100px;
+  }
+
+  .results-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-secondary {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 32px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-primary {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 32px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #9b5de5);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(124,106,255,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,255,0.45); }
+
+  /* Review modal */
+  .review-section {
+    display: none;
+    margin-top: 40px;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+  }
+
+  .review-section.open { display: block; animation: fadeUp 0.4s ease; }
+
+  .review-title {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .review-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px 24px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .review-item.r-correct { border-left: 3px solid var(--correct); }
+  .review-item.r-wrong   { border-left: 3px solid var(--wrong); }
+  .review-item.r-skip    { border-left: 3px solid var(--warn); }
+
+  .review-q { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 300; margin-bottom: 12px; color: var(--text); }
+  .review-answers { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+
+  .review-ans {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .review-ans.ra-correct { background: rgba(0,229,153,0.1); color: var(--correct); }
+  .review-ans.ra-wrong   { background: rgba(255,77,109,0.1); color: var(--wrong); }
+  .review-ans.ra-none    { background: rgba(255,209,102,0.1); color: var(--warn); }
+
+  .review-why { font-size: 13px; color: var(--muted); font-family: 'DM Mono', monospace; line-height: 1.55; }
+  .review-num { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .q-card { padding: 22px 18px; }
+    .action-row { flex-direction: column; align-items: stretch; }
+    .btn-next { margin-left: 0; justify-content: center; }
+    .header { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">⚙️</div>
+      <span class="logo-text">Software Engineering</span>
+    </div>
+    <div class="header-badge">NSCT Prep · 10%</div>
+  </header>
+
+  <!-- START SCREEN -->
+  <div id="screen-start" class="screen active">
+    <div class="start-hero">
+      <div class="start-tag">📚 National Skill Competency Test</div>
+      <h1 class="start-title">Software<br>Engineering<br>Quiz</h1>
+      <p class="start-sub">50 questions · shuffled options · instant feedback · detailed explanations</p>
+      <div class="stats-row">
+        <div class="stat-chip"><span>📝</span> <strong>50</strong> Questions</div>
+        <div class="stat-chip"><span>⏱️</span> <strong>30s</strong> per question</div>
+        <div class="stat-chip"><span>🎯</span> <strong>10%</strong> of NSCT</div>
+        <div class="stat-chip"><span>✨</span> Instant feedback</div>
+      </div>
+      <button class="btn-start" onclick="startQuiz()">
+        Start Quiz →
+      </button>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-meta">
+      <div class="q-counter">Question <strong id="q-num">1</strong> <span id="q-total">/ 50</span></div>
+      <div class="timer" id="timer">⏱ <span id="timer-val">30</span>s</div>
+      <div class="score-display">Score: <strong id="live-score">0</strong></div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+
+    <div class="q-card">
+      <div class="q-num-badge" id="q-badge">Question 1</div>
+      <p class="q-text" id="q-text"></p>
+    </div>
+
+    <div class="options-grid" id="options-container"></div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-label" id="feedback-label"></div>
+      <div class="feedback-explain" id="feedback-explain"></div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-skip" id="btn-skip" onclick="skipQuestion()">Skip →</button>
+      <button class="btn-next visible" id="btn-next" onclick="nextQuestion()" style="display:none">Next Question →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen">
+    <div class="results-header">
+      <span class="trophy" id="trophy">🏆</span>
+      <h2 class="results-title" id="results-title">Quiz Complete!</h2>
+      <p class="results-sub" id="results-sub"></p>
+    </div>
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        <svg viewBox="0 0 180 180">
+          <circle class="score-ring-bg" cx="90" cy="90" r="78"/>
+          <circle class="score-ring-fg" id="ring-fg" cx="90" cy="90" r="78" stroke-dasharray="490" stroke-dashoffset="490"/>
+        </svg>
+        <div class="score-ring-text">
+          <span class="score-big" id="score-pct">0%</span>
+          <span class="score-label">SCORE</span>
+        </div>
+      </div>
+    </div>
+    <div class="grade-badge"><span class="grade-pill" id="grade-pill"></span></div>
+    <div class="stats-cards">
+      <div class="stat-card c"><div class="stat-card-num" id="r-correct">0</div><div class="stat-card-lbl">Correct</div></div>
+      <div class="stat-card w"><div class="stat-card-num" id="r-wrong">0</div><div class="stat-card-lbl">Wrong</div></div>
+      <div class="stat-card sk"><div class="stat-card-num" id="r-skip">0</div><div class="stat-card-lbl">Skipped</div></div>
+      <div class="stat-card t"><div class="stat-card-num" id="r-time">0s</div><div class="stat-card-lbl">Avg Time</div></div>
+      <div class="stat-card p"><div class="stat-card-num" id="r-streak">0</div><div class="stat-card-lbl">Best Streak</div></div>
+      <div class="stat-card acc"><div class="stat-card-num" id="r-acc">0%</div><div class="stat-card-lbl">Accuracy</div></div>
+    </div>
+    <div class="results-actions">
+      <button class="btn-secondary" onclick="toggleReview()">📋 Review Answers</button>
+      <button class="btn-primary" onclick="restartQuiz()">🔄 Try Again</button>
+    </div>
+    <div class="review-section" id="review-section">
+      <h3 class="review-title">Answer Review</h3>
+      <div id="review-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS_RAW = [
+  { q: "What is the primary goal of Software Engineering?", a: "To create reliable, maintainable software efficiently", options: ["To write code as fast as possible","To create reliable, maintainable software efficiently","To use the latest programming languages","To make software look attractive"], why: "Software Engineering focuses on systematic development to ensure reliability and maintainability, not just coding speed." },
+  { q: "Which software process model is best suited for a project with clearly defined requirements that are unlikely to change?", a: "Waterfall Model", options: ["Spiral Model","Waterfall Model","Agile Model","Iterative Model"], why: "The Waterfall model is linear and sequential, working well when requirements are fixed from the start." },
+  { q: "In Agile development, what is a 'Sprint'?", a: "A short, fixed-length development cycle (usually 2–4 weeks)", options: ["A long-term project plan","A short, fixed-length development cycle (usually 2–4 weeks)","A daily meeting","A list of project risks"], why: "Sprints are time-boxed iterations in Scrum where a set of features is completed." },
+  { q: "Which requirement type specifies how well the system performs?", a: "Non-Functional Requirement", options: ["Functional Requirement","User Requirement","Non-Functional Requirement","Business Requirement"], why: "Non-functional requirements define quality attributes like speed, security, and usability." },
+  { q: "What does COCOMO stand for?", a: "Constructive Cost Model", options: ["Computer Coding Model","Constructive Cost Model","Comprehensive Object Model","Corrective Maintenance Model"], why: "COCOMO is a model used to estimate software project cost and effort based on size." },
+  { q: "A good software design aims for:", a: "Low coupling and high cohesion", options: ["High coupling and low cohesion","Low coupling and high cohesion","High coupling and high cohesion","Low coupling and low cohesion"], why: "Low coupling means modules are independent; high cohesion means each module has a single, clear purpose." },
+  { q: "Which architectural style builds an application as a collection of small, independent services?", a: "Microservices", options: ["Monolithic Architecture","Client-Server Architecture","Microservices","Layered Architecture"], why: "Microservices break down an app into small, independent services that communicate with each other." },
+  { q: "The SRS document primarily contains:", a: "The software requirements (what the system should do)", options: ["The code structure","The project budget","The software requirements (what the system should do)","The testing schedule"], why: "SRS stands for Software Requirements Specification." },
+  { q: "Which activity is NOT part of Software Project Management?", a: "Writing code", options: ["Cost Estimation","Writing code","Risk Management","Project Scheduling"], why: "Writing code is a development activity, while project management focuses on planning and oversight." },
+  { q: "Which model places heavy emphasis on identifying and managing risks?", a: "Spiral Model", options: ["Waterfall Model","Agile Model","Spiral Model","V-Model"], why: "The Spiral model's unique feature is its focus on risk analysis at each phase." },
+  { q: "What is a 'User Story' in Agile?", a: "A feature described from the user's perspective", options: ["A bug report from a user","A feature described from the user's perspective","A user's feedback after release","A technical specification document"], why: "User stories follow the format: 'As a [user], I want to [do something] so that [benefit].'" },
+  { q: "Which of the following is an example of a functional requirement for an ATM?", a: "The system must verify the user's PIN before allowing a withdrawal", options: ["The system must be available 24/7","The PIN verification must take less than 2 seconds","The system must verify the user's PIN before allowing a withdrawal","The interface must be user-friendly"], why: "This describes a specific function the system must perform. The others are non-functional." },
+  { q: "What is the main difference between Software Engineering and Programming?", a: "Software Engineering includes the entire systematic process, not just coding", options: ["They are the same thing","Programming includes project management","Software Engineering includes the entire systematic process, not just coding","Programming is only for web apps"], why: "Programming is a subset of Software Engineering, which covers the whole development lifecycle." },
+  { q: "In design, what does 'modularity' mean?", a: "Breaking software into smaller, independent components", options: ["Using the latest modules in Python","Breaking software into smaller, independent components","Making all code in one file","Reusing old code"], why: "Modularity helps manage complexity by dividing the system into manageable parts." },
+  { q: "Which of these is a key principle of good UI design?", a: "Consistency in buttons and layouts", options: ["Using many different fonts","Hiding system feedback from users","Consistency in buttons and layouts","Making everything flash"], why: "Consistency helps users learn and predict how the interface works." },
+  { q: "The Waterfall model phase sequence is:", a: "Analysis, Design, Coding, Testing, Maintenance", options: ["Coding, Testing, Design, Analysis, Maintenance","Analysis, Design, Coding, Testing, Maintenance","Design, Analysis, Coding, Maintenance, Testing","Testing, Coding, Design, Analysis, Maintenance"], why: "This is the classic linear order of the Waterfall model." },
+  { q: "What is the 'Product Backlog' in Scrum?", a: "A prioritized to-do list of all desired features", options: ["A list of completed features","A prioritized to-do list of all desired features","A list of team members' tasks for the day","A bug tracking list"], why: "The Product Backlog contains all user stories and tasks, prioritized by importance." },
+  { q: "Which model is considered an 'agile' framework?", a: "Scrum", options: ["Waterfall","Spiral","Scrum","COCOMO"], why: "Scrum is a specific framework used to implement Agile principles." },
+  { q: "What does 'low coupling' mean?", a: "Modules are independent and have minimal connections", options: ["Modules are heavily dependent on each other","Modules are independent and have minimal connections","Modules are hard to understand","Modules have many functions"], why: "Low coupling means changes in one module are less likely to affect others." },
+  { q: "What does 'high cohesion' mean?", a: "A module's elements are closely related and focused on a single purpose", options: ["A module performs many unrelated tasks","A module's elements are closely related and focused on a single purpose","Modules are tightly connected","A module is very large"], why: "High cohesion makes modules easier to understand and maintain." },
+  { q: "Who is responsible for managing the 'Project Triangle' (Scope, Time, Cost)?", a: "The project manager", options: ["The programmer","The UI designer","The project manager","The tester"], why: "Balancing scope, time, and cost is a core function of project management." },
+  { q: "Which of the following is an example of a non-functional requirement for a website?", a: "The website must load within 3 seconds", options: ["The website must have a login page","Users can reset their password via email","The website must load within 3 seconds","The website must display product images"], why: "This is a performance constraint, describing how well the system works, not what it does." },
+  { q: "What is the main purpose of a 'Daily Stand-up' meeting in Agile?", a: "To discuss progress and roadblocks as a team", options: ["To give a status report to management","To discuss progress and roadblocks as a team","To write code together","To plan the entire year"], why: "The daily stand-up is a short, collaborative team meeting to synchronize work." },
+  { q: "What is the key benefit of using Microservices architecture?", a: "Services can be developed and deployed independently", options: ["The entire code is in one place","Services can be developed and deployed independently","It requires less network communication","It's easier for beginners"], why: "Microservices allow teams to update small parts of an application without affecting the whole system." },
+  { q: "Which of the following is NOT a phase in the Waterfall model?", a: "Sprints", options: ["Design","Maintenance","Sprints","Testing"], why: "Sprints are part of Agile/Scrum methodology, not the Waterfall model." },
+  { q: "In the Spiral model, which activity is performed at each loop?", a: "Risk analysis", options: ["Risk analysis","Only coding","Only testing","Writing user stories"], why: "Risk analysis is the defining feature of each phase in the Spiral model." },
+  { q: "What does UX stand for in UI/UX design?", a: "User Experience", options: ["User Xperience","User Experience","Universal Xchange","Unified XML"], why: "UX focuses on the overall experience and ease of use, not just the visual interface." },
+  { q: "Which document serves as the official agreement between the customer and developers on what will be built?", a: "The SRS (Software Requirements Specification)", options: ["The code","The user manual","The SRS (Software Requirements Specification)","The test plan"], why: "The SRS formally documents all requirements agreed upon by stakeholders." },
+  { q: "Which of these is an example of good user feedback in UI design?", a: "A progress bar when saving a file", options: ["A progress bar when saving a file","No indication that a button was clicked","A sudden crash without explanation","Hiding all error messages"], why: "Progress bars inform users about the system's status, which is good UI feedback." },
+  { q: "Which software process model is best for a startup building a new app with uncertain requirements?", a: "Iterative/Evolutionary", options: ["Waterfall","Iterative/Evolutionary","Spiral","None of the above"], why: "An iterative model allows for flexibility and change as the startup learns more." },
+  { q: "What is a key value of the Agile Manifesto?", a: "Individuals and interactions over processes and tools", options: ["Following a rigid plan over responding to change","Comprehensive documentation over working software","Individuals and interactions over processes and tools","Contract negotiation over customer collaboration"], why: "Agile values people and teamwork more than strict adherence to tools." },
+  { q: "The Project Triangle consists of:", a: "Scope, Time, Cost", options: ["Coding, Testing, Deployment","Scope, Time, Cost","Design, Code, Test","Requirements, Design, Maintenance"], why: "Project managers constantly balance these three competing constraints." },
+  { q: "Which of the following describes 'Validation'?", a: "Are we building the right product?", options: ["Are we building the product right?","Are we building the right product?","Is the code formatted correctly?","Did we meet the budget?"], why: "Validation checks if the product meets the customer's actual needs." },
+  { q: "Which of the following describes 'Verification'?", a: "Are we building the product right?", options: ["Are we building the product right?","Are we building the right product?","Does the customer like it?","Is the market ready?"], why: "Verification checks if the product meets the specified requirements." },
+  { q: "What is the primary purpose of software testing?", a: "To find errors and ensure quality", options: ["To make the software look good","To find errors and ensure quality","To write documentation","To estimate project cost"], why: "Testing aims to identify defects and verify that the software works as expected." },
+  { q: "In Agile, the prioritized to-do list is called:", a: "Product Backlog", options: ["Sprint Backlog","Product Backlog","Burn-down Chart","Task List"], why: "The Product Backlog is the master list of work, prioritized by the Product Owner." },
+  { q: "Which of these is NOT a characteristic of good software?", a: "Complexity (unnecessary)", options: ["Maintainability","Reliability","Complexity (unnecessary)","Efficiency"], why: "Good software aims for simplicity and clarity, avoiding unnecessary complexity." },
+  { q: "What is the main focus of Software Architecture?", a: "The high-level structure and major components", options: ["The design of a single button","The color scheme of the app","The high-level structure and major components","The naming of variables"], why: "Architecture deals with the big-picture organization of the system." },
+  { q: "Which of the following is a functional requirement for an e-commerce site?", a: "The site must allow users to add items to a cart", options: ["The site should handle 1,000 users simultaneously","The checkout process must be secure","The site must allow users to add items to a cart","The site should load in under 2 seconds"], why: "This describes a specific function the system must perform." },
+  { q: "What does the Spiral model combine?", a: "Waterfall and iterative modeling with risk analysis", options: ["Waterfall and Agile","Waterfall and iterative modeling with risk analysis","Scrum and XP","Prototyping and maintenance"], why: "The Spiral model merges the step-by-step nature of Waterfall with iteration and risk analysis." },
+  { q: "Who typically writes User Stories?", a: "The project manager or product owner, with input from users", options: ["The tester","The project manager or product owner, with input from users","The compiler","The end-user only"], why: "User stories are written to capture user needs, often facilitated by a product owner." },
+  { q: "In UI design, what does 'consistency' mean?", a: "Having similar elements behave in similar ways across the app", options: ["Using different colors for every page","Having similar elements behave in similar ways across the app","Changing button locations on each screen","Using all capital letters"], why: "Consistency reduces the learning curve for users." },
+  { q: "Which model would be MOST risky to use for a project with unclear requirements?", a: "Waterfall", options: ["Agile","Iterative","Waterfall","Spiral"], why: "Waterfall requires clear, stable requirements upfront. Unclear requirements would lead to major problems later." },
+  { q: "What is a key feature of Microservices?", a: "Each service has its own independent process", options: ["Single codebase for all features","Each service has its own independent process","Difficult to scale","All services must use the same programming language"], why: "In microservices, each service runs independently and communicates via APIs." },
+  { q: "The success of a software project is measured by:", a: "Meeting scope, time, and cost goals while satisfying the customer", options: ["Meeting scope, time, and cost goals while satisfying the customer","Writing the most lines of code","Using the latest technology","Having the most team members"], why: "Successful projects deliver value within constraints and meet user needs." },
+  { q: "What does COCOMO estimate?", a: "The effort and time required for a project", options: ["The number of bugs in software","The user satisfaction score","The effort and time required for a project","The color scheme of the UI"], why: "COCOMO is an estimation model for project planning." },
+  { q: "Which of the following is an example of 'low coupling'?", a: "The payment module and inventory module operate independently", options: ["The payment module crashes when the inventory module updates","The payment module and inventory module operate independently","Both modules share all their data directly","One module cannot function without the other"], why: "Independence between modules is the definition of low coupling." },
+  { q: "Which of the following is an example of 'high cohesion'?", a: "A module that only handles user authentication", options: ["A module that handles both user login and printing receipts","A module that only handles user authentication","A module that does ten different unrelated tasks","A module that depends on five other modules"], why: "This module has one clear, focused purpose." },
+  { q: "Which process model is most suitable for a large, complex, and high-risk project like a nuclear reactor control system?", a: "Spiral", options: ["Waterfall","Agile","Spiral","V-Model"], why: "The Spiral model's focus on risk analysis makes it ideal for high-stakes projects." },
+  { q: "What is the primary purpose of the 'Daily Stand-up' meeting in Scrum?", a: "To inspect progress toward the Sprint goal and adapt the plan", options: ["To give a detailed status report to senior management","To inspect progress toward the Sprint goal and adapt the plan","To write code together as a team","To review the completed Sprint"], why: "The stand-up is for the team to synchronize and plan the next 24 hours, not a management report." }
+];
+
+// ─── state ───
+let questions = [];
+let current = 0;
+let score = 0;
+let skipped = 0;
+let wrong = 0;
+let answered = false;
+let timerInterval = null;
+let timeLeft = 30;
+let timeTaken = 0;
+let totalTime = 0;
+let streak = 0;
+let bestStreak = 0;
+let history = [];
+const LABELS = ['A', 'B', 'C', 'D'];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildQuestion(raw) {
+  return { ...raw, shuffled: shuffle(raw.options) };
+}
+
+function startQuiz() {
+  questions = shuffle(QUESTIONS_RAW).map(buildQuestion);
+  current = 0; score = 0; skipped = 0; wrong = 0;
+  timeTaken = 0; totalTime = 0; streak = 0; bestStreak = 0; history = [];
+  showScreen('screen-quiz');
+  loadQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function loadQuestion() {
+  answered = false;
+  timeLeft = 30;
+  const q = questions[current];
+
+  document.getElementById('q-num').textContent = current + 1;
+  document.getElementById('q-total').textContent = `/ ${questions.length}`;
+  document.getElementById('q-badge').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('progress-fill').style.width = ((current / questions.length) * 100) + '%';
+  document.getElementById('live-score').textContent = score;
+
+  const timer = document.getElementById('timer');
+  timer.classList.remove('urgent');
+  document.getElementById('timer-val').textContent = timeLeft;
+
+  const fb = document.getElementById('feedback-box');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+
+  const btn = document.getElementById('btn-next');
+  btn.style.display = 'none';
+  document.getElementById('btn-skip').style.display = 'block';
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+
+  q.shuffled.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-label">${LABELS[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(opt, btn, i);
+    container.appendChild(btn);
+  });
+
+  clearInterval(timerInterval);
+  timeTaken = Date.now();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer-val').textContent = timeLeft;
+    if (timeLeft <= 8) timer.classList.add('urgent');
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) timeoutQuestion();
+    }
+  }, 1000);
+}
+
+function selectAnswer(chosen, btnEl, idx) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const elapsed = Math.round((Date.now() - timeTaken) / 1000);
+  totalTime += elapsed;
+
+  const q = questions[current];
+  const correct = chosen === q.a;
+  const btns = document.querySelectorAll('.option-btn');
+
+  btns.forEach(b => b.classList.add('answered'));
+
+  if (correct) {
+    score++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+    btnEl.classList.add('correct');
+    btnEl.querySelector('.option-label').innerHTML = '✓';
+    showFeedback('correct', `✅ Correct! +1 point`, q.why);
+  } else {
+    wrong++;
+    streak = 0;
+    btnEl.classList.add('wrong');
+    btnEl.querySelector('.option-label').innerHTML = '✗';
+    // reveal correct
+    btns.forEach(b => {
+      const span = b.querySelectorAll('span')[1];
+      if (span.textContent === q.a) {
+        b.classList.add('reveal');
+        b.querySelector('.option-label').innerHTML = '✓';
+      }
+    });
+    showFeedback('wrong', `❌ Incorrect`, `Correct answer: <em>${q.a}</em> — ${q.why}`);
+  }
+
+  history.push({ q: q.q, chosen, correct: q.a, isCorrect: correct, isSkip: false, why: q.why });
+
+  document.getElementById('live-score').textContent = score;
+  document.getElementById('btn-skip').style.display = 'none';
+  const nb = document.getElementById('btn-next');
+  nb.style.display = 'flex';
+}
+
+function timeoutQuestion() {
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => {
+    b.classList.add('answered');
+    const span = b.querySelectorAll('span')[1];
+    if (span && span.textContent === q.a) {
+      b.classList.add('reveal');
+      b.querySelector('.option-label').innerHTML = '✓';
+    }
+  });
+  skipped++;
+  streak = 0;
+  showFeedback('timeout', '⏱ Time\'s up!', `Correct answer: <em>${q.a}</em> — ${q.why}`);
+  history.push({ q: q.q, chosen: null, correct: q.a, isCorrect: false, isSkip: true, why: q.why });
+  document.getElementById('btn-skip').style.display = 'none';
+  const nb = document.getElementById('btn-next');
+  nb.style.display = 'flex';
+}
+
+function skipQuestion() {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+  const q = questions[current];
+  skipped++;
+  streak = 0;
+  history.push({ q: q.q, chosen: null, correct: q.a, isCorrect: false, isSkip: true, why: q.why });
+  nextQuestion();
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showResults();
+  } else {
+    showScreen('screen-quiz');
+    loadQuestion();
+  }
+}
+
+function showFeedback(type, label, explain) {
+  const box = document.getElementById('feedback-box');
+  const lbl = document.getElementById('feedback-label');
+  const exp = document.getElementById('feedback-explain');
+  box.className = `feedback-box ${type}`;
+  lbl.innerHTML = label;
+  exp.innerHTML = explain;
+  box.style.display = 'block';
+}
+
+function showResults() {
+  clearInterval(timerInterval);
+  showScreen('screen-results');
+
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+  const avgTime = history.filter(h => !h.isSkip).length
+    ? Math.round(totalTime / history.filter(h => !h.isSkip).length)
+    : 0;
+  const accuracy = history.filter(h => !h.isSkip).length
+    ? Math.round((score / history.filter(h => !h.isSkip).length) * 100)
+    : 0;
+
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('r-correct').textContent = score;
+  document.getElementById('r-wrong').textContent = wrong;
+  document.getElementById('r-skip').textContent = skipped;
+  document.getElementById('r-time').textContent = avgTime + 's';
+  document.getElementById('r-streak').textContent = bestStreak;
+  document.getElementById('r-acc').textContent = accuracy + '%';
+
+  // Ring animation
+  const circumference = 2 * Math.PI * 78;
+  const offset = circumference * (1 - pct / 100);
+  const ring = document.getElementById('ring-fg');
+  ring.setAttribute('stroke-dasharray', circumference);
+  ring.setAttribute('stroke-dashoffset', circumference);
+  setTimeout(() => { ring.setAttribute('stroke-dashoffset', offset); }, 100);
+
+  let grade, color, emoji, sub;
+  if (pct >= 90) { grade='S'; color='#FFD700'; emoji='🏆'; sub='Outstanding! You mastered Software Engineering!'; }
+  else if (pct >= 80) { grade='A'; color='var(--correct)'; emoji='🌟'; sub='Excellent work! Ready for the NSCT!'; }
+  else if (pct >= 70) { grade='B'; color='var(--accent3)'; emoji='👍'; sub='Good job! A little more practice and you\'re set.'; }
+  else if (pct >= 60) { grade='C'; color='var(--accent)'; emoji='📚'; sub='Keep studying — you\'re on the right track!'; }
+  else if (pct >= 50) { grade='D'; color='var(--warn)'; emoji='💪'; sub='Almost there! Review the explanations and retry.'; }
+  else { grade='F'; color='var(--wrong)'; emoji='😤'; sub='Don\'t give up — review and try again!'; }
+
+  document.getElementById('trophy').textContent = emoji;
+  document.getElementById('results-title').textContent = pct >= 80 ? 'Amazing Result!' : pct >= 60 ? 'Good Effort!' : 'Keep Practicing!';
+  document.getElementById('results-sub').textContent = sub;
+  ring.style.stroke = color;
+  document.getElementById('score-pct').style.color = color;
+
+  const pill = document.getElementById('grade-pill');
+  pill.textContent = `Grade ${grade} · ${pct}%`;
+  pill.style.background = color + '22';
+  pill.style.color = color;
+  pill.style.border = `1.5px solid ${color}44`;
+
+  document.getElementById('review-section').classList.remove('open');
+}
+
+function toggleReview() {
+  const sec = document.getElementById('review-section');
+  if (!sec.classList.contains('open')) {
+    buildReview();
+    sec.classList.add('open');
+    sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    sec.classList.remove('open');
+  }
+}
+
+function buildReview() {
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  history.forEach((h, i) => {
+    const div = document.createElement('div');
+    div.className = `review-item ${h.isSkip ? 'r-skip' : h.isCorrect ? 'r-correct' : 'r-wrong'}`;
+    let ansHtml = '';
+    if (h.isSkip) {
+      ansHtml = `<div class="review-ans ra-none">⏭ Skipped</div><div class="review-ans ra-correct">✓ ${h.correct}</div>`;
+    } else if (h.isCorrect) {
+      ansHtml = `<div class="review-ans ra-correct">✓ ${h.chosen}</div>`;
+    } else {
+      ansHtml = `<div class="review-ans ra-wrong">✗ ${h.chosen}</div><div class="review-ans ra-correct">✓ ${h.correct}</div>`;
+    }
+    div.innerHTML = `
+      <div class="review-num">Q${i+1} · ${h.isSkip ? '⏭ Skipped' : h.isCorrect ? '✅ Correct' : '❌ Wrong'}</div>
+      <div class="review-q">${h.q}</div>
+      <div class="review-answers">${ansHtml}</div>
+      <div class="review-why">💡 ${h.why}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  document.getElementById('review-section').classList.remove('open');
+  showScreen('screen-start');
+}
+</script>
+</body>
+</html>
